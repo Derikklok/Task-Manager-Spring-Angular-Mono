@@ -1,0 +1,116 @@
+<div class="task-form-container">
+  <!-- Header -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <span class="navbar-brand">
+        <i class="bi bi-check2-circle"></i> Task Manager
+      </span>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container py-3 grow d-flex align-items-center">
+    <div class="w-100">
+      <!-- Page Header -->
+      <div class="mb-3">
+        <a routerLink="/tasks" class="btn btn-outline-secondary mb-2">
+          <i class="bi bi-arrow-left"></i> Back to Tasks
+        </a>
+        <h1 class="page-title">
+          {{ isEditMode ? 'Edit Task' : 'Create New Task' }}
+        </h1>
+      </div>
+
+      <!-- Form Card -->
+      <div class="form-card">
+      <!-- Error Alert -->
+      <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ error }}
+        <button type="button" class="btn-close" (click)="error = null"></button>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!loading">
+        <!-- Title Field -->
+        <div class="mb-3">
+          <label for="title" class="form-label">Task Title *</label>
+          <input
+            type="text"
+            class="form-control"
+            [class.is-invalid]="f['title'].touched && f['title'].errors"
+            id="title"
+            formControlName="title"
+            placeholder="Enter task title"
+            maxlength="200"
+          />
+          <div *ngIf="f['title'].touched && f['title'].errors" class="invalid-feedback d-block">
+            <span *ngIf="f['title'].errors['required']">Title is required</span>
+            <span *ngIf="f['title'].errors['minlength']">Title must be at least 3 characters</span>
+            <span *ngIf="f['title'].errors['maxlength']">Title cannot exceed 200 characters</span>
+          </div>
+          <small class="form-text text-muted">
+            {{ form.get('title')?.value?.length || 0 }}/200 characters
+          </small>
+        </div>
+
+        <!-- Description Field -->
+        <div class="mb-3">
+          <label for="description" class="form-label">Description</label>
+          <textarea
+            class="form-control"
+            [class.is-invalid]="f['description'].touched && f['description'].errors"
+            id="description"
+            formControlName="description"
+            placeholder="Enter task description (optional)"
+            rows="5"
+            maxlength="1000"
+          ></textarea>
+          <div *ngIf="f['description'].touched && f['description'].errors" class="invalid-feedback d-block">
+            <span *ngIf="f['description'].errors['maxlength']">Description cannot exceed 1000 characters</span>
+          </div>
+          <small class="form-text text-muted">
+            {{ form.get('description')?.value?.length || 0 }}/1000 characters
+          </small>
+        </div>
+
+        <!-- Status Field -->
+        <div class="mb-4">
+          <label for="status" class="form-label">Status *</label>
+          <select
+            class="form-select"
+            [class.is-invalid]="f['status'].touched && f['status'].errors"
+            id="status"
+            formControlName="status"
+          >
+            <option *ngFor="let option of statusOptions" [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          <div *ngIf="f['status'].touched && f['status'].errors" class="invalid-feedback d-block">
+            <span *ngIf="f['status'].errors['required']">Status is required</span>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="submitting || form.invalid"
+          >
+            <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            {{ isEditMode ? 'Update Task' : 'Create Task' }}
+          </button>
+          <a routerLink="/tasks" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

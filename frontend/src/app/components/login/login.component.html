@@ -1,0 +1,108 @@
+<div class="auth-wrapper">
+  <!-- Left Column: Background Image -->
+  <div class="auth-image-section">
+    <img src="/todo-login-bg.png" alt="Task Manager Illustration" class="auth-image">
+    <div class="auth-image-overlay">
+      <div class="auth-image-content">
+        <h2>Welcome to Task Manager</h2>
+        <p>Organize your work, boost your productivity</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column: Login Form -->
+  <div class="auth-form-section">
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <div class="auth-logo">
+            <i class="bi bi-check2-circle"></i>
+          </div>
+          <h1>{{ isRegisterMode ? 'Create Account' : 'Welcome Back' }}</h1>
+          <p class="subtitle">{{ isRegisterMode ? 'Sign up for Task Manager' : 'Sign in to your account' }}</p>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form">
+          <!-- Alert -->
+          <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ error }}
+          </div>
+
+          <!-- Email Field -->
+          <div class="mb-3">
+            <label for="email" class="form-label">
+              <i class="bi bi-envelope"></i> Email Address
+            </label>
+            <input
+              type="email"
+              class="form-control"
+              [class.is-invalid]="submitted && f['email'].errors"
+              id="email"
+              formControlName="email"
+              placeholder="Enter your email"
+            />
+            <div *ngIf="submitted && f['email'].errors" class="invalid-feedback d-block">
+              <span *ngIf="f['email'].errors['required']">Email is required</span>
+              <span *ngIf="f['email'].errors['email']">Please enter a valid email</span>
+            </div>
+          </div>
+
+          <!-- Password Field -->
+          <div class="mb-3">
+            <label for="password" class="form-label">
+              <i class="bi bi-lock"></i> Password
+            </label>
+            <input
+              type="password"
+              class="form-control"
+              [class.is-invalid]="submitted && f['password'].errors"
+              id="password"
+              formControlName="password"
+              placeholder="Enter your password"
+            />
+            <div *ngIf="submitted && f['password'].errors" class="invalid-feedback d-block">
+              <span *ngIf="f['password'].errors['required']">Password is required</span>
+              <span *ngIf="f['password'].errors['minlength']">Password must be at least 6 characters</span>
+            </div>
+          </div>
+
+          <!-- Role Field (Register Only) -->
+          <div *ngIf="isRegisterMode" class="mb-3">
+            <label for="role" class="form-label">
+              <i class="bi bi-briefcase"></i> Role
+            </label>
+            <select class="form-select" id="role" formControlName="role">
+              <option value="DEVELOPER">Developer</option>
+              <option value="MANAGER">Manager</option>
+            </select>
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            class="btn btn-primary w-100 mb-2"
+            [disabled]="loading"
+          >
+            <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            {{ isRegisterMode ? 'Sign Up' : 'Sign In' }}
+          </button>
+
+          <!-- Divider -->
+          <div class="divider">
+            <span>{{ isRegisterMode ? 'Already have an account?' : "Don't have an account?" }}</span>
+          </div>
+
+          <!-- Toggle Mode Link -->
+          <button
+            type="button"
+            class="btn btn-outline-primary w-100"
+            (click)="toggleMode()"
+          >
+            <i [class]="isRegisterMode ? 'bi bi-box-arrow-in-right' : 'bi bi-person-plus'"></i>
+            {{ isRegisterMode ? 'Sign In' : 'Create Account' }}
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

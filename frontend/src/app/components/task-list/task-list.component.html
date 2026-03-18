@@ -1,0 +1,175 @@
+<div class="task-list-container">
+  <!-- Header -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <span class="navbar-brand">
+        <i class="bi bi-check2-circle"></i> Task Manager
+      </span>
+      <div class="d-flex align-items-center gap-3">
+        <span class="user-info" *ngIf="authService.getCurrentUser()">
+          {{ authService.getCurrentUser()?.email }}
+        </span>
+        <button class="btn btn-outline-light btn-sm" (click)="logout()">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container-fluid py-3">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1 class="page-title">My Tasks</h1>
+      <a routerLink="/task/new" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> New Task
+      </a>
+    </div>
+
+    <!-- Error Alert -->
+    <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ error }}
+      <button type="button" class="btn-close" (click)="error = null"></button>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="form-label">Filter by Status</label>
+          <div class="dropdown">
+            <button
+              class="btn btn-primary dropdown-toggle w-100"
+              type="button"
+              (click)="toggleDropdown()"
+              [attr.aria-expanded]="dropdownOpen"
+            >
+              {{ getFilterLabel(selectedFilter) }}
+            </button>
+            <ul class="dropdown-menu w-100" [class.show]="dropdownOpen">
+              <li *ngFor="let option of statusOptions">
+                <button
+                  type="button"
+                  class="dropdown-item"
+                  [class.active]="selectedFilter === option.value"
+                  (click)="selectFilterOption(option.value)"
+                >
+                  {{ option.label }}
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="searchInput" class="form-label">Search Tasks</label>
+          <input
+            type="text"
+            class="form-control"
+            id="searchInput"
+            placeholder="Search by title or description..."
+            [(ngModel)]="searchQuery"
+            (input)="onSearchChange()"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="text-center py-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && filteredTasks.length === 0" class="empty-state">
+      <i class="bi bi-inbox"></i>
+      <h3>No Tasks Found</h3>
+      <p>{{ searchQuery || selectedFilter !== 'ALL' ? 'Try adjusting your filters' : 'Create your first task to get started' }}</p>
+    </div>
+
+    <!-- Tasks Table -->
+    <div *ngIf="!loading && filteredTasks.length > 0" class="table-responsive">
+      <table class="table table-hover task-table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let task of filteredTasks" class="task-row">
+            <td class="task-title">{{ task.title }}</td>
+            <td class="task-description">
+              {{ task.description ? (task.description.length > 50 ? task.description.substring(0, 50) + '...' : task.description) : '-' }}
+            </td>
+            <td>
+              <span class="badge" [ngClass]="'bg-' + getStatusBadgeClass(task.status)">
+                {{ getStatusLabel(task.status) }}
+              </span>
+            </td>
+            <td class="task-date">
+              {{ task.createdAt ? (task.createdAt | date: 'short') : '-' }}
+            </td>
+            <td class="task-actions">
+              <a
+                [routerLink]="['/task', task.id]"
+                class="btn btn-sm btn-outline-primary me-2"
+                title="Edit"
+              >
+                <i class="bi bi-pencil"></i> Edit
+              </a>
+              <button
+                class="btn btn-sm btn-outline-danger"
+                (click)="deleteTask(task.id)"
+                title="Delete"
+              >
+                <i class="bi bi-trash"></i> Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Task Count -->
+    <div class="task-count-footer" *ngIf="!loading && tasks.length > 0">
+      <small>Showing {{ filteredTasks.length }} of {{ tasks.length }} tasks</small>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" #deleteConfirmModal tabindex="-1" aria-labelledby="deleteConfirmLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content delete-modal">
+      <div class="modal-header delete-modal-header">
+        <h5 class="modal-title" id="deleteConfirmLabel">
+          <i class="bi bi-exclamation-triangle"></i> Delete Task
+        </h5>
+        <button type="button" class="btn-close" (click)="cancelDelete()"></button>
+      </div>
+      <div class="modal-body delete-modal-body">
+        <p>Are you sure you want to delete this task?</p>
+        <p class="text-muted small">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer delete-modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancelDelete()">
+          Cancel
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-danger" 
+          (click)="confirmDelete()"
+          [disabled]="isDeleting"
+        >
+          <span *ngIf="isDeleting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          {{ isDeleting ? 'Deleting...' : 'Delete Task' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,238 @@
+```
+╔════════════════════════════════════════════════════════════════════════════╗
+║                  TASK MANAGER - API DOCUMENTATION                          ║
+║                                                                            ║
+║                    JWT Authentication Implementation                        ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+BASE URL: http://localhost:8080
+
+═══════════════════════════════════════════════════════════════════════════════
+1. AUTHENTICATION ENDPOINTS
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─ REGISTER NEW USER ─────────────────────────────────────────────────────────┐
+│                                                                              │
+│ POST /api/auth/register                                                     │
+│                                                                              │
+│ Description: Register a new user account                                   │
+│                                                                              │
+│ Request Headers:                                                            │
+│   Content-Type: application/json                                           │
+│                                                                              │
+│ Request Body:                                                               │
+│ {                                                                            │
+│   "email": "user@example.com",        // Required, must be valid email     │
+│   "password": "securePassword123",    // Required, minimum 6 characters    │
+│   "role": "DEVELOPER"                 // Required, "MANAGER" or "DEVELOPER"│
+│ }                                                                            │
+│                                                                              │
+│ Success Response (201 Created):                                             │
+│ {                                                                            │
+│   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",                      │
+│   "email": "user@example.com",                                              │
+│   "id": 1,                                                                   │
+│   "role": "DEVELOPER",                                                       │
+│   "message": "User registered successfully"                                │
+│ }                                                                            │
+│                                                                              │
+│ Error Responses:                                                             │
+│   409 Conflict:                                                              │
+│   {                                                                          │
+│     "status": 409,                                                          │
+│     "message": "Email is already registered",                              │
+│     "timestamp": "2026-03-18T13:00:00"                                      │
+│   }                                                                          │
+│                                                                              │
+│   400 Bad Request:                                                           │
+│   {                                                                          │
+│     "status": 400,                                                          │
+│     "errors": {                                                              │
+│       "password": "Password must be at least 6 characters",                 │
+│       "role": "Invalid role. Must be MANAGER or DEVELOPER"                 │
+│     },                                                                       │
+│     "timestamp": "2026-03-18T13:00:00"                                      │
+│   }                                                                          │
+│                                                                              │
+│ Example with cURL:                                                          │
+│ $ curl -X POST http://localhost:8080/api/auth/register \                   │
+│   -H "Content-Type: application/json" \                                    │
+│   -d '{"email":"john@example.com","password":"pass123","role":"DEVELOPER"}'│
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+
+┌─ LOGIN USER ───────────────────────────────────────────────────────────────┐
+│                                                                              │
+│ POST /api/auth/login                                                       │
+│                                                                              │
+│ Description: Login with email and password to receive JWT token            │
+│                                                                              │
+│ Request Headers:                                                            │
+│   Content-Type: application/json                                           │
+│                                                                              │
+│ Request Body:                                                               │
+│ {                                                                            │
+│   "email": "user@example.com",         // Required, valid email            │
+│   "password": "securePassword123"      // Required, correct password       │
+│ }                                                                            │
+│                                                                              │
+│ Success Response (200 OK):                                                  │
+│ {                                                                            │
+│   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",                      │
+│   "email": "user@example.com",                                              │
+│   "id": 1,                                                                   │
+│   "role": "DEVELOPER",                                                       │
+│   "message": "Login successful"                                             │
+│ }                                                                            │
+│                                                                              │
+│ Error Responses:                                                             │
+│   401 Unauthorized:                                                          │
+│   {                                                                          │
+│     "status": 401,                                                          │
+│     "message": "Invalid email or password",                                 │
+│     "timestamp": "2026-03-18T13:00:00"                                      │
+│   }                                                                          │
+│                                                                              │
+│   400 Bad Request (missing fields):                                         │
+│   {                                                                          │
+│     "status": 400,                                                          │
+│     "errors": {                                                              │
+│       "email": "Email is required"                                          │
+│     },                                                                       │
+│     "timestamp": "2026-03-18T13:00:00"                                      │
+│   }                                                                          │
+│                                                                              │
+│ Example with cURL:                                                          │
+│ $ curl -X POST http://localhost:8080/api/auth/login \                      │
+│   -H "Content-Type: application/json" \                                    │
+│   -d '{"email":"john@example.com","password":"pass123"}'                   │
+│                                                                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+2. USING JWT TOKEN FOR AUTHENTICATED REQUESTS
+═══════════════════════════════════════════════════════════════════════════════
+
+After logging in, use the token in Authorization header for other endpoints:
+
+Format: Authorization: Bearer <jwt_token>
+
+Example:
+$ curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." \
+       http://localhost:8080/api/tasks
+
+Postman Example:
+1. Go to Headers tab
+2. Add new header:
+   Key: Authorization
+   Value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+═══════════════════════════════════════════════════════════════════════════════
+3. PROTECTED ENDPOINTS (Example with @PreAuthorize)
+═══════════════════════════════════════════════════════════════════════════════
+
+These endpoints are NOT YET IMPLEMENTED but the system is ready for them:
+
+GET /api/tasks
+  Status: 401 if no token or invalid token
+  Status: 200 if authenticated
+
+POST /api/tasks
+  Authorization: Bearer <token>
+  Requires: Authenticated user
+
+DELETE /api/tasks/{id}
+  Authorization: Bearer <token>
+  Requires: User with MANAGER role
+
+═══════════════════════════════════════════════════════════════════════════════
+4. TOKEN STRUCTURE
+═══════════════════════════════════════════════════════════════════════════════
+
+JWT tokens are composed of 3 parts separated by dots: header.payload.signature
+
+Example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUu...
+
+Header (decoded):
+{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+
+Payload (decoded):
+{
+  "sub": "user@example.com",
+  "iat": 1710765600,
+  "exp": 1710852000
+}
+
+Where:
+  sub = User's email (subject)
+  iat = Issued at (Unix timestamp)
+  exp = Expiration (Unix timestamp)
+
+═══════════════════════════════════════════════════════════════════════════════
+5. ERROR CODES REFERENCE
+═══════════════════════════════════════════════════════════════════════════════
+
+200 OK              - Request successful
+201 Created         - Resource created (registration)
+400 Bad Request     - Invalid input or missing required fields
+401 Unauthorized    - Missing or invalid authentication credentials
+409 Conflict        - Email already registered
+500 Internal Error  - Server error
+
+═══════════════════════════════════════════════════════════════════════════════
+6. VALIDATION RULES
+═══════════════════════════════════════════════════════════════════════════════
+
+Email:
+  - Must be valid format (user@example.com)
+  - Must be unique across all users
+  - Case-insensitive in database
+
+Password:
+  - Minimum 6 characters
+  - Encrypted with BCrypt before storage
+  - Never returned in API responses
+
+Role:
+  - Must be "MANAGER" or "DEVELOPER"
+  - Case-insensitive input
+  - Used for @PreAuthorize decorators
+
+═══════════════════════════════════════════════════════════════════════════════
+7. SECURITY NOTES
+═══════════════════════════════════════════════════════════════════════════════
+
+✓ All passwords are hashed with BCrypt (10 rounds)
+✓ JWT tokens are signed with HS256 algorithm
+✓ Tokens contain expiration time (default: 24 hours)
+✓ CSRF protection disabled for stateless API
+✓ Session management is STATELESS (no cookies)
+✓ CORS is enabled for cross-origin requests
+✓ All endpoints except /api/auth/** require authentication
+
+═══════════════════════════════════════════════════════════════════════════════
+8. QUICK START
+═══════════════════════════════════════════════════════════════════════════════
+
+Step 1: Register a new user
+POST http://localhost:8080/api/auth/register
+Body: {"email":"test@example.com","password":"password123","role":"DEVELOPER"}
+
+Step 2: Copy the returned token
+"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+Step 3: Use token for authenticated requests
+Header: Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+Step 4: Or login with credentials
+POST http://localhost:8080/api/auth/login
+Body: {"email":"test@example.com","password":"password123"}
+
+═══════════════════════════════════════════════════════════════════════════════
+```
+
+

@@ -1,0 +1,96 @@
+# Docker Compose configuration for Task Manager
+# Backend (Spring Boot) + MySQL Database
+# Frontend will be added later as a separate service
+
+version: '3.8'
+
+services:
+  # Backend Service (Spring Boot)
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: task-manager-backend
+    ports:
+      - "8080:8080"
+    environment:
+      # Server Configuration
+      PORT: 8080
+      
+      # Database Configuration
+      DB_URL: jdbc:mysql://mysql:3306/task_manager
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD:-root_password}
+      
+      # JWT Configuration
+      JWT_SECRET: ${JWT_SECRET:-your_very_secure_jwt_secret_key_at_least_32_characters_long_for_hs256}
+      JWT_EXP: ${JWT_EXP:-86400000}
+      
+      # Spring Configuration
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - task-manager-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # MySQL Database Service
+  mysql:
+    image: mysql:8.0.36
+    container_name: task-manager-mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root_password}
+      MYSQL_DATABASE: task_manager
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: ${DB_PASSWORD:-root_password}
+    volumes:
+      # Persist database data
+      - mysql_data:/var/lib/mysql
+      # Optional: Initialize database with schema
+      # - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - task-manager-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Frontend Service (To be added later)
+  # frontend:
+  #   build:
+  #     context: ../frontend
+  #     dockerfile: Dockerfile
+  #   container_name: task-manager-frontend
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     REACT_APP_API_URL: http://localhost:8080
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - task-manager-network
+  #   restart: unless-stopped
+
+# Named volumes for data persistence
+volumes:
+  mysql_data:
+    driver: local
+
+# Network for inter-service communication
+networks:
+  task-manager-network:
+    driver: bridge
+
