@@ -55,6 +55,8 @@ That's it! 🎉
 - Role-based access control (MANAGER, DEVELOPER)
 - Automatic user association from JWT token
 
+![Login Page](assets/login-ang-page.png)
+
 ### 📝 Task Management
 - Create, Read, Update, Delete (CRUD) tasks
 - User isolation (each user sees only their tasks)
@@ -62,6 +64,12 @@ That's it! 🎉
 - Task status workflow (TO DO, IN PROGRESS, COMPLETED)
 - Task filtering and search functionality
 - Comprehensive input validation
+
+![Task Dashboard](assets/Task-dashboard.png)
+
+![Create Task Form](assets/Create-task.png)
+
+![Task Filtering](assets/Drop-down.png)
 
 ### 🎨 User Interface
 - **Professional Design** - Dark blue theme with gradients
@@ -153,6 +161,10 @@ docker-compose restart
 docker-compose down -v
 docker system prune -a
 ```
+
+**Example Docker Compose Logs Output:**
+
+![Docker Compose Logs](assets/code.png)
 
 ---
 
