@@ -2,6 +2,14 @@
 
 A modern, production-ready task management application built with **Angular 21** (Frontend), **Spring Boot 4.0.3** (Backend), and **MySQL 8.0** (Database). Fully containerized with Docker Compose for seamless development and deployment.
 
+## Git manager
+This project was developed separately for the backend and frontend. Mono repo was created at the end.
+For reviewing purposes use below repository combined with git submodule for quick navigation.
+
+```bash
+https://github.com/Derikklok/task-manager-angular-spring-web.git
+```
+
 ## 🚀 Quick Start (3 Steps)
 
 ### Prerequisites

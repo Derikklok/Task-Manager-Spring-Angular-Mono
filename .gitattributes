@@ -1,0 +1,16 @@
+# Shell scripts must always use LF (Unix) line endings
+*.sh text eol=lf
+
+# Docker entrypoints must always use LF
+docker-entrypoint.sh text eol=lf
+
+# Dockerfiles should use LF
+Dockerfile text eol=lf
+
+# Windows batch files use CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Auto-detect line endings for everything else
+* text=auto
